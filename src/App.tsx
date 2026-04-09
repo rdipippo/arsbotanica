@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import emailjs from '@emailjs/browser';
 import { motion } from 'motion/react';
 import { Menu, X, Instagram, Mail, MapPin, ArrowRight, Flower2, Heart, Sparkles } from 'lucide-react';
 
@@ -208,17 +209,37 @@ const Gallery = () => {
   );
 };
 
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID ?? '';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID ?? '';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY ?? '';
+
 const Contact = () => {
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const [status, setStatus] = React.useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRef.current) return;
+    setStatus('sending');
+    try {
+      await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formRef.current, { publicKey: EMAILJS_PUBLIC_KEY });
+      setStatus('success');
+      formRef.current.reset();
+    } catch {
+      setStatus('error');
+    }
+  };
+
   return (
     <section id="contact" className="py-24 px-6 bg-brand-olive text-white">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center">
         <div>
           <h2 className="font-display text-4xl md:text-6xl mb-8">Let's Create <br /><span className="italic font-light">Together</span></h2>
           <p className="text-white/80 text-lg mb-12 leading-relaxed max-w-md">
-            We are currently booking for the 2026 and 2027 seasons. 
+            We are currently booking for the 2026 and 2027 seasons.
             Tell us about your event and we'll be in touch to schedule a consultation.
           </p>
-          
+
           <div className="space-y-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center">
@@ -250,28 +271,38 @@ const Contact = () => {
           </div>
         </div>
 
-        <form className="bg-white p-8 md:p-12 rounded-3xl text-brand-ink space-y-6 shadow-2xl">
+        <form ref={formRef} onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-3xl text-brand-ink space-y-6 shadow-2xl">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Name</label>
-              <input type="text" className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+              <input name="from_name" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
             </div>
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Email</label>
-              <input type="email" className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+              <input name="reply_to" type="email" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Event Date</label>
-            <input type="date" className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+            <input name="event_date" type="date" className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
           </div>
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Message</label>
-            <textarea rows={4} className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors resize-none" />
+            <textarea name="message" rows={4} required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors resize-none" />
           </div>
-          <button className="w-full bg-brand-olive text-white py-4 rounded-full uppercase tracking-widest text-sm font-semibold hover:bg-brand-ink transition-colors">
-            Send Inquiry
+          <button
+            type="submit"
+            disabled={status === 'sending'}
+            className="w-full bg-brand-olive text-white py-4 rounded-full uppercase tracking-widest text-sm font-semibold hover:bg-brand-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {status === 'sending' ? 'Sending…' : 'Send Inquiry'}
           </button>
+          {status === 'success' && (
+            <p className="text-center text-brand-olive text-sm font-semibold">Your inquiry has been sent! We'll be in touch soon.</p>
+          )}
+          {status === 'error' && (
+            <p className="text-center text-red-500 text-sm">Something went wrong. Please try again or email us directly.</p>
+          )}
         </form>
       </div>
     </section>
