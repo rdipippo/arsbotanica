@@ -63,7 +63,7 @@ const Hero = () => {
           <h1 className="font-display text-6xl md:text-8xl leading-[0.9] mb-8 text-balance">
             Curated <br />
             Floral <br />
-            Artistry
+            <h2 className="font-display text-6xl md:text-8xl mb-8"><span className="italic font-light">Artistry</span></h2>
           </h1>
           <p className="text-lg md:text-xl text-brand-ink/70 max-w-md mb-10 leading-relaxed">
             Bespoke floral designs for weddings, events, and intimate gatherings. 
@@ -163,11 +163,11 @@ const Services = () => {
 const Gallery = () => {
   const images = [
     "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800",
+    "/arsbotanica/portfolio/springSilkInstallation.png",
     "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&q=80&w=800",
+    "/arsbotanica/portfolio/flowersInSink.png",
     "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&q=80&w=800"
+    "/arsbotanica/portfolio/flowersOnTable.png"
   ];
 
   return (
@@ -282,7 +282,7 @@ const Contact = () => {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest opacity-60">Instagram</p>
-                <p className="text-lg">@arsbotanica_studio</p>
+                <p className="text-lg"><a href="https://www.instagram.com/ars.botanica.floralstudio/">@arsbotanica_studio</a></p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -352,10 +352,16 @@ const Contact = () => {
               <input name="guest_count" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
             </div>
           </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Estimated Floral Budget<Req /></label>
+              <input name="est_budget" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+          </div>
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Venue Name<Req /></label>
             <input name="venue_name" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
           </div>
+</div>
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Your Address<Req /></label>
             <input name="address_line1" type="text" placeholder="Street address" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors placeholder:opacity-40" />
