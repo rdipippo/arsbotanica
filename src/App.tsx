@@ -6,7 +6,8 @@
 import React from 'react';
 import emailjs from '@emailjs/browser';
 import { motion } from 'motion/react';
-import { Menu, X, Instagram, Mail, MapPin, ArrowRight, Flower2, Heart, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, X, Instagram, Mail, MapPin, ArrowRight, Flower2, Heart, Sparkles, Phone } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -59,12 +60,9 @@ const Hero = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="text-brand-clay uppercase tracking-[0.3em] text-xs font-semibold mb-6 block">
-            Elizabeth Larson-DiPippo
-          </span>
           <h1 className="font-display text-6xl md:text-8xl leading-[0.9] mb-8 text-balance">
             Curated <br />
-            <span className="italic font-light">Floral</span> <br />
+            Floral <br />
             Artistry
           </h1>
           <p className="text-lg md:text-xl text-brand-ink/70 max-w-md mb-10 leading-relaxed">
@@ -72,13 +70,13 @@ const Hero = () => {
             We believe in the poetic language of flowers and their power to transform spaces.
           </p>
           <div className="flex flex-wrap gap-6">
-            <button className="bg-brand-olive text-white px-8 py-4 rounded-full text-sm uppercase tracking-widest hover:bg-brand-ink transition-all flex items-center gap-2 group">
+            <a href="#contact" className="bg-brand-olive text-white px-8 py-4 rounded-full text-sm uppercase tracking-widest hover:bg-brand-ink transition-all flex items-center gap-2 group">
               Inquire Now
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="border border-brand-ink/20 px-8 py-4 rounded-full text-sm uppercase tracking-widest hover:bg-brand-ink hover:text-white transition-all">
+            </a>
+            <a href="#gallery" className="border border-brand-ink/20 px-8 py-4 rounded-full text-sm uppercase tracking-widest hover:bg-brand-ink hover:text-white transition-all">
               View Portfolio
-            </button>
+            </a>
           </div>
         </motion.div>
 
@@ -180,9 +178,9 @@ const Gallery = () => {
             <h2 className="font-display text-4xl md:text-5xl mb-4">The Portfolio</h2>
             <p className="text-brand-ink/60 uppercase tracking-widest text-sm">A collection of our recent work</p>
           </div>
-          <button className="text-sm uppercase tracking-widest font-semibold flex items-center gap-2 hover:text-brand-clay transition-colors">
+          <Link to="/portfolio" className="text-sm uppercase tracking-widest font-semibold flex items-center gap-2 hover:text-brand-clay transition-colors">
             View All Work <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
@@ -209,6 +207,8 @@ const Gallery = () => {
   );
 };
 
+const Req = () => <span className="text-red-500 ml-0.5">*</span>;
+
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID ?? '';
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID ?? '';
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY ?? '';
@@ -216,6 +216,21 @@ const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY ?? '';
 const Contact = () => {
   const formRef = React.useRef<HTMLFormElement>(null);
   const [status, setStatus] = React.useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [eventType, setEventType] = React.useState('');
+  const [files, setFiles] = React.useState<File[]>([]);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const addFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    setFiles(prev => {
+      const existing = new Set(prev.map(f => f.name + f.size));
+      const next = Array.from(incoming).filter(f => !existing.has(f.name + f.size));
+      return [...prev, ...next];
+    });
+  };
+
+  const removeFile = (index: number) => setFiles(prev => prev.filter((_, i) => i !== index));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,6 +239,8 @@ const Contact = () => {
     try {
       await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formRef.current, { publicKey: EMAILJS_PUBLIC_KEY });
       setStatus('success');
+      setEventType('');
+      setFiles([]);
       formRef.current.reset();
     } catch {
       setStatus('error');
@@ -247,9 +264,18 @@ const Contact = () => {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest opacity-60">Email</p>
-                <p className="text-lg">hello@arsbotanica.com</p>
+                <p className="text-lg"><a href="mailto:hello@arsbotanica.com">hello@arsbotanica.com</a></p>
               </div>
             </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest opacity-60">Phone</p>
+                <p className="text-lg">(603) 953-7032</p>
+              </div>
+            </div> 
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center">
                 <Instagram className="w-5 h-5" />
@@ -272,23 +298,114 @@ const Contact = () => {
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-3xl text-brand-ink space-y-6 shadow-2xl">
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Event Type<Req /></label>
+            <select
+              name="event_type"
+              required
+              value={eventType}
+              onChange={e => setEventType(e.target.value)}
+              className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors bg-transparent"
+            >
+              <option value="" disabled>Select…</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Corporate Event">Corporate Event</option>
+              <option value="Fundraiser">Fundraiser</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Name</label>
+              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Name<Req /></label>
               <input name="from_name" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
             </div>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Email</label>
+              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Email<Req /></label>
               <input name="reply_to" type="email" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Event Date</label>
-            <input name="event_date" type="date" className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+          {eventType === 'Wedding' && (
+            <>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Fiancé's Name<Req /></label>
+                  <input name="fiance_name" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Fiancé's Email<Req /></label>
+                  <input name="fiance_email" type="email" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Wedding Colors<Req /></label>
+                <input name="wedding_colors" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+              </div>
+            </>
+          )}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Event Date<Req /></label>
+              <input name="event_date" type="date" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Number of Guests<Req /></label>
+              <input name="guest_count" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+            </div>
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Message</label>
+            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Venue Name<Req /></label>
+            <input name="venue_name" type="text" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Your Address<Req /></label>
+            <input name="address_line1" type="text" placeholder="Street address" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors placeholder:opacity-40" />
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-2 md:col-span-1">
+              <input name="address_city" type="text" placeholder="City" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors placeholder:opacity-40" />
+            </div>
+            <div className="space-y-2">
+              <input name="address_state" type="text" placeholder="State" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors placeholder:opacity-40" />
+            </div>
+            <div className="space-y-2">
+              <input name="address_zip" type="text" placeholder="ZIP" required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors placeholder:opacity-40" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Event Details<Req /></label>
             <textarea name="message" rows={4} required className="w-full border-b border-brand-ink/20 py-2 focus:border-brand-olive outline-none transition-colors resize-none" />
+          </div>
+          {/* Inspiration upload */}
+          <div className="space-y-3">
+            <label className="text-xs uppercase tracking-widest font-semibold opacity-60">Inspiration Pictures</label>
+            <div
+              onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={e => { e.preventDefault(); setIsDragging(false); addFiles(e.dataTransfer.files); }}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${isDragging ? 'border-brand-olive bg-brand-olive/5' : 'border-brand-ink/20 hover:border-brand-olive/50'}`}
+            >
+              <p className="text-sm text-brand-ink/50">Drag & drop images here, or <span className="text-brand-olive font-semibold">browse</span></p>
+              <p className="text-xs text-brand-ink/30 mt-1">JPG, PNG, WEBP — multiple files OK</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => addFiles(e.target.files)}
+              />
+            </div>
+            {files.length > 0 && (
+              <ul className="space-y-2">
+                {files.map((file, i) => (
+                  <li key={i} className="flex items-center justify-between text-sm bg-brand-cream rounded-lg px-4 py-2">
+                    <span className="truncate max-w-[80%] text-brand-ink/70">{file.name}</span>
+                    <button type="button" onClick={() => removeFile(i)} className="text-brand-ink/30 hover:text-brand-clay transition-colors ml-2 text-lg leading-none">&times;</button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <button
             type="submit"
@@ -298,10 +415,10 @@ const Contact = () => {
             {status === 'sending' ? 'Sending…' : 'Send Inquiry'}
           </button>
           {status === 'success' && (
-            <p className="text-center text-brand-olive text-sm font-semibold">Your inquiry has been sent! We'll be in touch soon.</p>
+            <p className="text-center text-brand-olive text-lg text-green-500 font-bold">Your inquiry has been sent! We'll be in touch soon.</p>
           )}
           {status === 'error' && (
-            <p className="text-center text-red-500 text-sm">Something went wrong. Please try again or email us directly.</p>
+            <p className="text-center text-red-500 text-lg">Something went wrong. Please try again or email us directly.</p>
           )}
         </form>
       </div>
@@ -320,10 +437,6 @@ const Footer = () => {
         <p className="text-sm text-brand-ink/50 uppercase tracking-widest">
           &copy; {new Date().getFullYear()} Ars Botanica Studio. All rights reserved.
         </p>
-        <div className="flex gap-6 text-brand-ink/50">
-          <Instagram className="w-5 h-5 cursor-pointer hover:text-brand-olive transition-colors" />
-          <Mail className="w-5 h-5 cursor-pointer hover:text-brand-olive transition-colors" />
-        </div>
       </div>
     </footer>
   );
